@@ -1,0 +1,48 @@
+dwi2mask lw37_complete.mif lw37_mask.nii.gz	
+
+dwi2response tournier lw37_complete.mif -shell 1600 -lmax 8 -mask lw37_mask.nii.gz lw37_sfr.txt
+
+dwiextract lw37_complete.mif - | dwi2fod msmt_csd - lw37_sfr.txt lw37_fod.nii.gz -mask lw37_mask.nii.gz 
+
+# Get the 5TT image
+5ttgen fsl anatomy/t1_acpc.nii.gz lw_5tt.nii.gz
+
+# Generate tractogram
+
+FAs="0.05 0.10"
+Curv="60"
+
+for j in $FAs; do
+for k in $Curv; do
+tckgen lw37_fod.nii.gz lw_results_$j\_$k.tck -number 5000 -cutoff $j -angle $k -act lw_5tt.nii.gz -backtrack -seed_dynamic lw37_fod.nii.gz -unidirectional; 
+echo " "
+done
+done
+
+	
+	altogether=""
+
+	for z in lw_results*; do
+		altogether+="${z} "
+	done
+
+	tckedit $altogether lw_et.tck -force
+
+	# SIFT'em now to 9.6 mln
+	#tcksift ET_candidate.tck ../$i\_FOD.nii ET_candidate_sifted.tck -term_number 1000 -csv sifting_results.csv -force -info
+
+	# SIFT2 the results (maybe)
+
+	#tcksift2 ET_candidate_sifted.tck ../$i\_FOD.nii ET_candidate_sifted_weights -force
+
+	# Clear the folder
+	#rm results*
+	#rm ET_candidate.tck
+}
+
+for r in $subjects; do 
+  analizuj "$r"
+  done
+	
+
+
