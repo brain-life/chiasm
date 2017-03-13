@@ -54,5 +54,7 @@ lighting phong;
 set(gcf,'Color',[1 1 1])
 drawnow
 
+quit
+
 % save figure to disk
 print(fig_h,'my_figure','-dpng','-r600');%'-dpsc2')
