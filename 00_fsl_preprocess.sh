@@ -49,7 +49,7 @@ Preparation () {
 	dwi2mask $data/$high_res/$a\_clean_075mm.mif $data/$high_res/$a\_clean_075mm_mask.mif
 
 	# Estimating single fibre response (SFR) for default lmax
-	dwi2response tournier $data/$high_res/$a\_clean_075mm.mif $data/$high_res/$a\_clean_075mm_SFR.txt -shell 1600 -lmax 8 -mask $data/$high_res/$a\_clean_075mm_mask.mif -voxels $data/$high_res/Temporal/$a_clean_075mm_SFR_voxels.mif
+	dwi2response tournier $data/$high_res/$a\_clean_075mm.mif $data/$high_res/$a\_clean_075mm_SFR.txt -shell 1600 -lmax 8 -mask $data/$high_res/$a\_clean_075mm_mask.mif -voxels $data/$high_res/Temporal/$a\_clean_075mm_SFR_voxels.mif
 
 	# Estimating FOD for previously obtained SFR
 	dwiextract $data/$high_res/$a\_clean_075mm.mif - | dwi2fod msmt_csd - $data/$high_res/$a\_clean_075mm_SFR.txt $data/$high_res/$a\_clean_075mm_FOD.mif -mask $data/$high_res/$a\_clean_075mm_mask.mif
