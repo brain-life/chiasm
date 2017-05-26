@@ -1,0 +1,59 @@
+Evaluate_anatomy (){
+
+cur_path=$(pwd)
+subj=$1
+
+analysis_folder=/home/auguser2016/Projects/Chiasm_RJP_FP/$subj
+mkdir $analysis_folder/ROIs
+cd $analysis_folder/ROIs
+
+mrconvert $analysis_folder/$subj\_start_right.mif $analysis_folder/ROIs/$subj\_start_right.nii
+mrconvert $analysis_folder/$subj\_start_left.mif $analysis_folder/ROIs/$subj\_start_left.nii
+mrconvert $analysis_folder/$subj\_end_right.mif $analysis_folder/ROIs/$subj\_end_right.nii
+mrconvert $analysis_folder/$subj\_end_left.mif $analysis_folder/ROIs/$subj\_end_left.nii
+
+matlab -r "addpath(genpath('/home/auguser2016/Software/vistasoft-master'));addpath(genpath('/home/auguser2016/Software/mba'));addpath(genpath('/home/auguser2016/Software/encode'));dtiImportRoiFromNifti('$analysis_folder/ROIs/${subj}_start_right.nii','${subj}_start_right');dtiImportRoiFromNifti('$analysis_folder/ROIs/${subj}_start_left.nii','${subj}_start_left');dtiImportRoiFromNifti('$analysis_folder/ROIs/${subj}_end_right.nii','${subj}_end_right');dtiImportRoiFromNifti('$analysis_folder/ROIs/${subj}_end_left.nii','${subj}_end_left')"
+
+cd $cur_path
+}
+
+Evaluate_dwi (){
+
+cur_path=$(pwd)
+subj=$1
+
+analysis_folder=/home/auguser2016/Projects/Chiasm_RJP_FP/$subj
+mkdir $analysis_folder/ROIs_dwi
+cd $analysis_folder/ROIs_dwi
+
+mrconvert $analysis_folder/$subj\_sr.mif $analysis_folder/ROIs_dwi/$subj\_start_right.nii
+mrconvert $analysis_folder/$subj\_sl.mif $analysis_folder/ROIs_dwi/$subj\_start_left.nii
+mrconvert $analysis_folder/$subj\_er.mif $analysis_folder/ROIs_dwi/$subj\_end_right.nii
+mrconvert $analysis_folder/$subj\_el.mif $analysis_folder/ROIs_dwi/$subj\_end_left.nii
+
+matlab -r "addpath(genpath('/home/auguser2016/Software/vistasoft-master'));addpath(genpath('/home/auguser2016/Software/mba'));addpath(genpath('/home/auguser2016/Software/encode'));dtiImportRoiFromNifti('$analysis_folder/ROIs_dwi/${subj}_start_right.nii','${subj}_start_right');dtiImportRoiFromNifti('$analysis_folder/ROIs_dwi/${subj}_start_left.nii','${subj}_start_left');dtiImportRoiFromNifti('$analysis_folder/ROIs_dwi/${subj}_end_right.nii','${subj}_end_right');dtiImportRoiFromNifti('$analysis_folder/ROIs_dwi/${subj}_end_left.nii','${subj}_end_left')"
+
+cd $cur_path
+}
+
+
+Evaluate_acpc (){
+
+cur_path=$(pwd)
+subj=$1
+
+analysis_folder=/home/auguser2016/Projects/Chiasm_RJP_FP_ACPC/$subj/ROIs
+cd $analysis_folder
+
+mrconvert $analysis_folder/$subj\_sr.mif $analysis_folder/$subj\_start_right.nii
+mrconvert $analysis_folder/$subj\_sl.mif $analysis_folder/$subj\_start_left.nii
+mrconvert $analysis_folder/$subj\_er.mif $analysis_folder/$subj\_end_right.nii
+mrconvert $analysis_folder/$subj\_el.mif $analysis_folder/$subj\_end_left.nii
+
+matlab -r "addpath(genpath('/home/auguser2016/Software/vistasoft-master'));addpath(genpath('/home/auguser2016/Software/mba'));addpath(genpath('/home/auguser2016/Software/encode'));dtiImportRoiFromNifti('$analysis_folder/${subj}_start_right.nii','${subj}_start_right');dtiImportRoiFromNifti('$analysis_folder/${subj}_start_left.nii','${subj}_start_left');dtiImportRoiFromNifti('$analysis_folder/${subj}_end_right.nii','${subj}_end_right');dtiImportRoiFromNifti('$analysis_folder/${subj}_end_left.nii','${subj}_end_left')"
+
+cd $cur_path
+}
+
+
+Evaluate_acpc $1
