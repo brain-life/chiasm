@@ -5,7 +5,7 @@ addpath(genpath('/home/auguser2016/Software/mba'))
 addpath(genpath('/home/auguser2016/Software/encode'))
 
 % Define participant
-subj ='uf97'
+subj ='fe21'
 
 % Define relevant folders
 general_data=strcat('/home/auguser2016/dMRI_DATA/PREPROCESSED_DATA/0.75mm_iso/',subj,'/')
