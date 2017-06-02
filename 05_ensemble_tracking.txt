@@ -1,0 +1,258 @@
+# 1 Argument: ID of participant
+
+# Requirements:
+# Data preprocessed
+# DWI corregisterd to anatomy
+# Done and corrected 5TT segmentation
+
+ROIs_tracking_anatomy () {
+
+subj=$1
+data=/home/auguser2016/dMRI_DATA/PREPROCESSED_DATA/0.75mm_iso/$subj
+output=/home/auguser2016/Projects/Chiasm_RJP_FP/$subj
+mkdir $output
+mkdir $output/Tractography_dwi
+cd $output
+
+# Manually create 4 ROIs for given data set
+#mrview $data/$subj\_clean_075mm_FOD.mif -overlay.load $data/$subj\_075mm_anatomical_coreg2nodif_undist_2.nii.gz
+
+# SFR Estimation
+lmax=6 #This should be as low as possible, optimal for most participants value #SFR for lower lmax, keep it and use higher 8,10,12 for fod estimation OR Get SFR with optimal lmax for most participants and use given lmax for all participants. Lower lmax preffered
+#dwi2response tournier $data/$subj\_clean_075mm.mif -shell 1600 -lmax $lmax -mask $data/$subj\_clean_075mm_mask.mif $output/$subj\_sfr.txt -voxels $data/Temporal/$subj\_SFR_voxels.mif
+
+# Estimation of Fiber Orientation Distribution function
+#for lmax in 8 10 12; do  
+#  dwiextract $data/$subj\_clean_075mm.mif - | dwi2fod msmt_csd - $output/$subj\_sfr.txt -lmax $lmax $output/$subj\_FOD_lmax_$lmax.mif -mask $data/$subj\_clean_075mm_mask.mif
+#done
+
+# Generation of 5TT image based on acpc registerred image
+#5ttgen fsl anatomy/$subj\_t1_acpc.nii.gz $subj\_5tt.nii.gz
+
+# Generate tractogram
+
+lmax="8 10 12"
+FAs="0.05"
+Curv="30 45 60"
+
+tt_image=$data/$subj\_5tt_for_act_modified.nii.gz
+
+for i in $lmax; do
+  for j in $FAs; do
+    for k in $Curv; do
+      echo $subj\_results_r_r_$i\_$j\_$k
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 100000; 
+      #echo $subj\_results_r_l_$i\_$j\_$k
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_el.mif -stop -step 0.2 -maxnum 100000; 
+      #echo $subj\_results_l_r_$i\_$j\_$k
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sl.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 100000; 
+      #echo $subj\_results_l_l_$i\_$j\_$k
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sl.mif -include $output/$subj\_el.mif -stop -step 0.2 -maxnum 100000; 
+      
+      #echo $subj\_results_r_r_$i\_$j\_$k\_no_ACT
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_r_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 100000; 
+      #echo $subj\_results_r_l_$i\_$j\_$k\_no_ACT
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_l_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_el.mif -stop -step 0.2 -maxnum 100000; 
+      #echo $subj\_results_l_r_$i\_$j\_$k\_no_ACT
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_r_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sl.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 100000; 
+      #echo $subj\_results_l_l_$i\_$j\_$k\_no_ACT
+      #tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_l_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sl.mif -include $output//$subj\_el.mif -stop -step 0.2 -maxnum 100000; 
+      
+      
+      echo $subj\_results_r_r_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $data/$subj\_5tt_for_act_modified.nii.gz -unidirectional -seed_image $output/$subj\_start_right.mif -include $output/$subj\_end_right.mif -stop -step 0.2 -maxnum 100000; 
+      echo $subj\_results_r_l_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $data/$subj\_5tt_for_act_modified.nii.gz -unidirectional -seed_image $output/$subj\_start_right.mif -include $output/$subj\_end_left.mif -stop -step 0.2 -maxnum 100000; 
+      echo $subj\_results_l_r_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $data/$subj\_5tt_for_act_modified.nii.gz -unidirectional -seed_image $output/$subj\_start_left.mif -include $output/$subj\_end_right.mif -stop -step 0.2 -maxnum 100000; 
+      echo $subj\_results_l_l_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $data/$subj\_5tt_for_act_modified.nii.gz -unidirectional -seed_image $output/$subj\_start_left.mif -include $output/$subj\_end_left.mif -stop -step 0.2 -maxnum 100000; 
+      
+      echo $subj\_results_r_r_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_r_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff 0.10 -angle $k -unidirectional -seed_image $output/$subj\_start_right.mif -include $output/$subj\_end_right.mif -stop -step 0.2 -maxnum 100000; 
+      echo $subj\_results_r_l_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_r_l_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff 0.10 -angle $k -unidirectional -seed_image $output/$subj\_start_right.mif -include $output/$subj\_end_left.mif -stop -step 0.2 -maxnum 100000; 
+      echo $subj\_results_l_r_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_r_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff 0.10 -angle $k -unidirectional -seed_image $output/$subj\_start_left.mif -include $output/$subj\_end_right.mif -stop -step 0.2 -maxnum 100000; 
+      echo $subj\_results_l_l_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography/$subj\_results_l_l_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff 0.10 -angle $k -unidirectional -seed_image $output/$subj\_start_left.mif -include $output//$subj\_end_left.mif -stop -step 0.2 -maxnum 100000; 
+      
+      echo " "
+    done
+  done
+done
+
+
+
+cd $output/Tractography
+
+tckedit *_??.tck $subj\_ACT.tck
+tckedit *r_r*_??.tck $subj\_r_r_ACT.tck
+tckedit *r_l*_??.tck $subj\_r_l_ACT.tck
+tckedit *l_r*_??.tck $subj\_l_r_ACT.tck
+tckedit *l_l*_??.tck $subj\_l_l_ACT.tck
+
+tckedit *_no_ACT.tck $subj\_no_ACT.tck
+tckedit *r_r*_no_ACT.tck $subj\_r_r_no_ACT.tck
+tckedit *r_l*_no_ACT.tck $subj\_r_l_no_ACT.tck
+tckedit *l_r*_no_ACT.tck $subj\_l_r_no_ACT.tck
+tckedit *l_l*_no_ACT.tck $subj\_l_l_no_ACT.tck
+
+}
+
+ROIs_tracking_dwi () {
+
+subj=$1
+data=/home/auguser2016/dMRI_DATA/PREPROCESSED_DATA/0.75mm_iso/$subj
+output=/home/auguser2016/Projects/Chiasm_RJP_FP/$subj
+mkdir $output
+mkdir $output/Tractography_dwi
+cd $output
+
+# Manually create 4 ROIs for given data set
+#mrview $data/$subj\_clean_075mm_FOD.mif -overlay.load $data/$subj\_075mm_anatomical_coreg2nodif_undist_2.nii.gz
+
+# SFR Estimation
+lmax=6 #This should be as low as possible, optimal for most participants value #SFR for lower lmax, keep it and use higher 8,10,12 for fod estimation OR Get SFR with optimal lmax for most participants and use given lmax for all participants. Lower lmax preffered
+#dwi2response tournier $data/$subj\_clean_075mm.mif -shell 1600 -lmax $lmax -mask $data/$subj\_clean_075mm_mask.mif $output/$subj\_sfr.txt -voxels $data/Temporal/$subj\_SFR_voxels.mif
+
+# Estimation of Fiber Orientation Distribution function
+#for lmax in 8 10 12; do  
+#  dwiextract $data/$subj\_clean_075mm.mif - | dwi2fod msmt_csd - $output/$subj\_sfr.txt -lmax $lmax $output/$subj\_FOD_lmax_$lmax.mif -mask $data/$subj\_clean_075mm_mask.mif
+#done
+
+# Generation of 5TT image based on acpc registerred image
+#5ttgen fsl anatomy/$subj\_t1_acpc.nii.gz $subj\_5tt.nii.gz
+
+# Generate tractogram
+
+lmax="8 10 12"
+FAs="0.05"
+Curv="30 45 60"
+
+tt_image=$data/$subj\_5tt_for_act_modified_dwi.nii.gz
+
+for i in $lmax; do
+  for j in $FAs; do
+    for k in $Curv; do
+      echo $subj\_results_r_r_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_r_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_r_l_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_r_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_el.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_l_r_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_l_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sl.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_l_l_$i\_$j\_$k
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_l_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/$subj\_sl.mif -include $output/$subj\_el.mif -stop -step 0.2 -maxnum 10000000; 
+      
+      echo $subj\_results_r_r_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_r_r_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_r_l_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_r_l_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sr.mif -include $output/$subj\_el.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_l_r_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_l_r_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sl.mif -include $output/$subj\_er.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_l_l_$i\_$j\_$k\_no_ACT
+      tckgen $output/$subj\_FOD_lmax_$i.mif Tractography_dwi/$subj\_results_l_l_$i\_$j\_$k\_no_ACT.tck -number 200 -cutoff $j -angle $k -unidirectional -seed_image $output/$subj\_sl.mif -include $output//$subj\_el.mif -stop -step 0.2 -maxnum 10000000; 
+      
+      echo " "
+    done
+  done
+done
+
+
+
+cd $output/Tractography_dwi
+
+tckedit *_??.tck $subj\_ACT.tck
+tckedit *r_r*_??.tck $subj\_r_r_ACT.tck
+tckedit *r_l*_??.tck $subj\_r_l_ACT.tck
+tckedit *l_r*_??.tck $subj\_l_r_ACT.tck
+tckedit *l_l*_??.tck $subj\_l_l_ACT.tck
+
+tckedit *_no_ACT.tck $subj\_no_ACT.tck
+tckedit *r_r*_no_ACT.tck $subj\_r_r_no_ACT.tck
+tckedit *r_l*_no_ACT.tck $subj\_r_l_no_ACT.tck
+tckedit *l_r*_no_ACT.tck $subj\_l_r_no_ACT.tck
+tckedit *l_l*_no_ACT.tck $subj\_l_l_no_ACT.tck
+
+}
+
+
+ACPC_tracking () {
+
+subj=$1
+data=/home/auguser2016/Projects/Chiasm_RJP_FP_ACPC/$subj
+output=/home/auguser2016/Projects/Chiasm_RJP_FP_ACPC/$subj
+
+
+mkdir $output/Tractography
+cd $output
+
+# SFR Estimation
+#lmax=6 #This should be as low as possible, optimal for most participants value #SFR for lower lmax, keep it and use higher 8,10,12 for fod estimation OR Get SFR with optimal lmax for most participants and use given lmax for all participants. Lower lmax preffered
+#dwi2response tournier $data/$subj\_clean_075mm.mif -shell 1600 -lmax $lmax -mask $data/$subj\_clean_075mm_mask.mif $output/$subj\_sfr.txt -voxels $data/Temporal/$subj\_SFR_voxels.mif
+
+# Estimation of Fiber Orientation Distribution function
+#for lmax in 8 10 12; do  
+#  dwiextract $data/$subj\_clean_075mm.mif - | dwi2fod msmt_csd - $output/$subj\_sfr.txt -lmax $lmax $output/$subj\_FOD_lmax_$lmax.mif -mask $data/$subj\_clean_075mm_mask.mif
+#done
+
+# Generation of 5TT image based on acpc registerred image
+#5ttgen fsl anatomy/$subj\_t1_acpc.nii.gz $subj\_5tt.nii.gz
+
+# Generate tractogram
+
+lmax="8 10 12"
+FAs="0.05"
+Curv="30 45 60"
+
+tt_image=$data/$subj\_t1_acpc_5tt_corrected.nii.gz
+#tt_image=$data/$subj\_t1_acpc_5tt.nii.gz
+
+for i in $lmax; do
+  for j in $FAs; do
+    for k in $Curv; do
+      echo $subj\_results_r_r_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography/$subj\_results_r_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/ROIs/$subj\_sr.mif -include $output/ROIs/$subj\_er.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_r_l_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography/$subj\_results_r_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/ROIs/$subj\_sr.mif -include $output/ROIs/$subj\_el.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_l_r_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography/$subj\_results_l_r_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/ROIs/$subj\_sl.mif -include $output/ROIs/$subj\_er.mif -stop -step 0.2 -maxnum 10000000; 
+      echo $subj\_results_l_l_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography/$subj\_results_l_l_$i\_$j\_$k.tck -number 200 -cutoff $j -angle $k -act $tt_image -unidirectional -seed_image $output/ROIs/$subj\_sl.mif -include $output/ROIs/$subj\_el.mif -stop -step 0.2 -maxnum 10000000; 
+      
+      echo " "
+    done
+  done
+done
+
+
+
+cd $output/Tractography
+
+tckedit *_??.tck $subj\_ACT.tck
+tckedit *r_r*_??.tck $subj\_r_r_ACT.tck
+tckedit *r_l*_??.tck $subj\_r_l_ACT.tck
+tckedit *l_r*_??.tck $subj\_l_r_ACT.tck
+tckedit *l_l*_??.tck $subj\_l_l_ACT.tck
+
+}
+
+
+
+
+
+#for i in /home/auguser2016/Projects/Chiasm_RJP_FP/*; do ROIs_tracking ${i: -4}; done
+
+
+
+ACPC_tracking $1
+
+#source 03_life.m $subj
+
+#for r in $subjects; do 
+#  analizuj "$r"
+#  done
+	
+#matlab -nodisplay -r 03_life.m
+
+

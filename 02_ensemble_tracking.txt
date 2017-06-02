@@ -1,0 +1,63 @@
+# 1 Argument: ID of participant
+
+# Requirements:
+# Data preprocessed
+# DWI corregisterd to anatomy
+# Masks estimated
+# ROIs drawn
+
+subj=$1
+analysis_folder=/media/auguser2016/Volume/Quantifying_Chiasm
+
+mkdir $analysis_folder/$subj
+
+output=$analysis_folder/$subj
+
+# SFR Estimation
+lmax=6 'This should be as low as possible, optimal for most participants value #SFR for lower lmax, keep it and use higher 8,10,12 for fod estimation OR Get SFR with optimal lmax for most participants and use given lmax for all participants. Lower lmax preffered'
+dwi2response tournier $subj\_complete.mif -shell 1600 -lmax $lmax -mask $subj\_mask_upsampled.nii.gz $output/$subj\_sfr.txt 
+
+# Estimation of Fiber Orientation Distribution function
+for lmax in "8 10 12"; do  
+  dwiextract $subj\_complete.mif - | dwi2fod msmt_csd - $output/$subj\_sfr.txt $output/$subj\_fod_lmax_$lmax\.nii.gz -mask $subj\_mask_upsampled.nii.gz -lmax $lmax
+done
+
+# Generation of 5TT image based on acpc registerred image
+5ttgen fsl anatomy/$subj\_t1_acpc.nii.gz $subj\_5tt.nii.gz
+
+# Generate tractogram
+
+lmax="8 10 12"
+FAs="0.05"
+Curv="30 45 60"
+
+for i in $lmax; do
+  for j in $FAs; do
+    for k in $Curv; do
+      tckgen $subj\_fod_lmax_$lmax\.nii.gz lw_results_r_r_$i\_$j\_$k.tck -number 300 -cutoff $j -angle $k -act lw_5tt.nii.gz -unidirectional -seed_image $subj\_start_right.mif -include $subj\_end_right.mif -stop -step 0.2 -rk4; 
+      tckgen $subj\_fod_lmax_$lmax\.nii.gz lw_results_r_l_$i\_$j\_$k.tck -number 300 -cutoff $j -angle $k -act lw_5tt.nii.gz -unidirectional -seed_image $subj\_start_right.mif -include $subj\_end_left.mif -stop -step 0.2 -rk4; 
+      tckgen $subj\_fod_lmax_$lmax\.nii.gz lw_results_l_r_$i\_$j\_$k.tck -number 300 -cutoff $j -angle $k -act lw_5tt.nii.gz -unidirectional -seed_image $subj\_start_left.mif -include $subj\_end_right.mif -stop -step 0.2 -rk4; 
+      tckgen $subj\_fod_lmax_$lmax\.nii.gz lw_results_l_l_$i\_$j\_$k.tck -number 300 -cutoff $j -angle $k -act lw_5tt.nii.gz -unidirectional -seed_image $subj\_start_left.mif -include $subj\_end_left.mif -stop -step 0.2 -rk4; 
+      echo " "
+    done
+  done
+done
+
+altogether=""
+
+for z in *.tck; do
+  altogether+="${z} "
+done
+
+tckedit $altogether $subj\_et.tck -force
+
+
+source 03_life.m $subj
+
+#for r in $subjects; do 
+#  analizuj "$r"
+#  done
+	
+matlab -nodisplay -r 03_life.m
+
+
